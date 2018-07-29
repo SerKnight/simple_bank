@@ -11,14 +11,10 @@ contract SimpleBank {
     address public owner;
 
     // Events - publicize actions to external listeners
-    
     /* Add an argument for this event, an accountAddress */
     event LogEnrolled(address accountAddress);
-
     /* Add 2 arguments for this event, an accountAddress and an amount */
     event LogDepositMade(address accountAddress, uint amount);
-
-    /* Create an event called LogWithdrawal */
     /* Add 3 arguments for this event, an accountAddress, withdrawalAmount and a newBalance */
     event LogWithdrawal(address accountAddress, uint withdrawalAmount, uint newBalance);
 
@@ -44,29 +40,32 @@ contract SimpleBank {
     /// @return The balance of the user after the deposit is made
     // Add the appropriate keyword so that this function can receive ether
     function deposit() public payable returns (uint) {
-        
+
         balances[msg.sender] += msg.value;
         
         emit LogDepositMade(msg.sender, msg.value);
         
-        return balance();
+        return balances[msg.sender];
         /* Add the amount to the user's balance, call the event associated with a deposit,
           then return the balance of the user */
     }
 
     /// @notice Withdraw ether from bank
     /// @dev This does not return any excess ether sent to it
-    /// @param withdrawAmount amount you want to withdraw
+    /// @param withdrawalAmount amount you want to withdraw
     /// @return The balance remaining for the user
-    function withdraw(uint withdrawAmount) public returns (uint) {
-        
-        if(balances[msg.sender] < withdrawAmount) revert();
+    function withdraw(uint256 withdrawalAmount) public returns (uint remainingBal) {
 
-        msg.sender.transfer(withdrawAmount);
 
-        balances[msg.sender] -= withdrawAmount;
+        if( balances[msg.sender] < withdrawalAmount ) { revert(); }
 
-        emit LogWithdrawal(msg.sender, withdrawAmount, balances[msg.sender]);
+        msg.sender.transfer(withdrawalAmount);
+
+        balances[msg.sender] -= withdrawalAmount;
+
+        emit LogWithdrawal(msg.sender, withdrawalAmount, balances[msg.sender]);
+
+
 
         return balances[msg.sender];
 
@@ -80,8 +79,6 @@ contract SimpleBank {
     /// @return The balance of the user
     // A SPECIAL KEYWORD prevents function from editing state variables;
     // allows function to run locally/off blockchain
-
-    // pure ?
     function balance() public constant returns (uint) {
         /* Get the balance of the sender of this transaction */
         return balances[msg.sender];
